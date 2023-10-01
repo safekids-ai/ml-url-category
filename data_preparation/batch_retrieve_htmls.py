@@ -14,10 +14,12 @@ os.makedirs("txt_output", exist_ok=True)
 
 url_df = pd.read_csv('unified_urls.csv')
 urls = list(url_df.domain)
+del url_df
 batch_size = 1000
 max_workers = 30
 
 grouped_urls = [urls[i:i+batch_size] for i in range(0, len(urls), batch_size)]
+del urls
 
 protocols = ['https://','http://']
 
