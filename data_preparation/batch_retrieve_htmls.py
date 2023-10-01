@@ -4,7 +4,13 @@ import re
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 import os
+import boto3
+import pyarrow as pa
+from io import BytesIO
 
+
+s3_client = boto3.client('s3')
+os.makedirs("txt_output", exist_ok=True)
 
 url_df = pd.read_csv('unified_urls.csv')
 urls = list(url_df.domain)
@@ -30,17 +36,24 @@ def retrieve(url):
         if r.status_code==200:
             text = process_resp(r)
             # Save the retrieved text to a file
-            with open(f'output/{url}.txt', "w", encoding="utf-8") as file:
+            with open(f'txt_output/{url}.txt', "w", encoding="utf-8") as file:
                 file.write(text)
         else:
             r = requests.get(protocols[1]+url,timeout=5)
             if r.status_code==200:
                 text = process_resp(r)
                 # Save the retrieved text to a file
-                with open(f'output/{url}.txt', "w", encoding="utf-8") as file:
+                with open(f'txt_output/{url}.txt', "w", encoding="utf-8") as file:
                     file.write(text)
     except:
         pass
+
+def write_df_to_s3(df,s3_bucket,s3_object_key):
+    parquet_buffer = BytesIO()
+    pa.parquet.write_table(pa.Table.from_pandas(df), parquet_buffer)
+    # Upload Parquet file to S3
+    parquet_buffer.seek(0)
+    s3_client.upload_fileobj(parquet_buffer, s3_bucket, s3_object_key)
 
 def unite_txts(txts,batchid):
     data = []
@@ -51,7 +64,10 @@ def unite_txts(txts,batchid):
         url=url.strip('.txt')
         data.append({'url':url,'text':text})
     df = pd.DataFrame(data)
-    df.to_parquet(f'output_parquets/n_{batchid}.parquet')   
+    write_df_to_s3(df,'batch-htmls',f'n_{batchid}.parquet')
+    # df.to_parquet(f'output_parquets/n_{batchid}.parquet')
+
+
 
 # Main function to orchestrate the retrieval and processing of URLs
 def main():
