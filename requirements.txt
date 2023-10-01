@@ -1,6 +1,6 @@
 pandas
 requests
-re
+regex
 beautifulsoup4
 boto3
 pyarrow
