@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 import boto3
 import pyarrow as pa
+import pyarrow.parquet as pq
 from io import BytesIO
 
 
@@ -16,7 +17,7 @@ url_df = pd.read_csv('unified_urls.csv')
 urls = list(url_df.domain)
 del url_df
 batch_size = 1000
-max_workers = 30
+max_workers = 20
 
 grouped_urls = [urls[i:i+batch_size] for i in range(0, len(urls), batch_size)]
 del urls
@@ -52,7 +53,7 @@ def retrieve(url):
 
 def write_df_to_s3(df,s3_bucket,s3_object_key):
     parquet_buffer = BytesIO()
-    pa.parquet.write_table(pa.Table.from_pandas(df), parquet_buffer)
+    pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
     # Upload Parquet file to S3
     parquet_buffer.seek(0)
     s3_client.upload_fileobj(parquet_buffer, s3_bucket, s3_object_key)
@@ -60,9 +61,9 @@ def write_df_to_s3(df,s3_bucket,s3_object_key):
 def unite_txts(txts,batchid):
     data = []
     for url in txts:
-        with open('output/'+url, encoding="utf-8") as f:
+        with open('txt_output/'+url, encoding="utf-8") as f:
             text = f.read()
-        os.remove('output/'+url)
+        os.remove('txt_output/'+url)
         url=url.strip('.txt')
         data.append({'url':url,'text':text})
     df = pd.DataFrame(data)
@@ -80,7 +81,7 @@ def main():
             # Use ThreadPoolExecutor to fetch and save HTML in parallel
             executor.map(retrieve, batch)
 
-        txts = [f for f in os.listdir('output') if f.endswith('txt')]  
+        txts = [f for f in os.listdir('txt_output') if f.endswith('txt')]  
         unite_txts(txts,batchid)
 
 if __name__=='__main__':
