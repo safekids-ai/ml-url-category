@@ -60,12 +60,12 @@ def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='
 
 
 #This is needed if parsing was interrupted and you are continueing download from the previous batch. 
-def get_max_batch_N(s3, path, mode):
+def get_max_batch_N(s3, bucket_or_directory, mode):
     files = []
     # Create a paginator for listing objects in the S3 bucket
     if mode=='s3':
         paginator = s3.get_paginator('list_objects_v2')
-        pages = paginator.paginate(Bucket=path)
+        pages = paginator.paginate(Bucket=bucket_or_directory)
 
         # Iterate over each page of results
         for page in pages:
@@ -82,7 +82,7 @@ def get_max_batch_N(s3, path, mode):
             return 0
     elif mode=='local':
         # List files in the local directory
-        for filename in os.listdir(path):
+        for filename in os.listdir(bucket_or_directory):
             if filename.endswith('.parquet'):
                 try:
                     batch_number = int(filename.split('n')[0].split('_')[1])

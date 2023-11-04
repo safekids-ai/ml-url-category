@@ -1,8 +1,11 @@
 MAX_WORKERS = 30
 PROTOCOLS = ["https://","http://"]
-BUCKET_TO_SAVE = 'batch-htmls'
-FILE_KEY = f'urls.csv'
+FILE_KEY = '5m_urls.json'
 LOCAL_TMP_DIR = "txt_output"
-BULK_DATA_PATH = '5m_urls.json'
-BULK_DATA_BUCKET = 'batch-urls'
+
+BULK_DATA_BUCKET_OR_PATH = 'data_dir'
+
+GOOGLE_QUERIES_PATH = 'helpers/google_queries.json'
+PARSED_DATA_PATH = 'data_preparation/google_queries/'
+BUCKET_OR_PATH_TO_SAVE = 'batch-htmls'
 
