@@ -5,7 +5,7 @@ import os
 import boto3
 from io import StringIO
 from helpers.utils import retrieve, unite_txts, get_max_batch_N
-from helpers.config import MAX_WORKERS, BULK_DATA_PATH, BULK_DATA_BUCKET, FILE_KEY, BUCKET_TO_SAVE, LOCAL_TMP_DIR
+from helpers.config import MAX_WORKERS, BULK_DATA_BUCKET_OR_PATH, FILE_KEY, BUCKET_OR_PATH_TO_SAVE, LOCAL_TMP_DIR
 from tqdm import tqdm
 
 import argparse
@@ -23,11 +23,11 @@ mode = args.mode
 if mode == 's3':
     s3_client = boto3.client('s3')
     #I stored all my urls on s3, but since we want to load it from local, you should run it run it with local mode.
-    response = s3_client.get_object(Bucket= BULK_DATA_BUCKET, Key=FILE_KEY)
+    response = s3_client.get_object(Bucket= BULK_DATA_BUCKET_OR_PATH, Key=FILE_KEY)
     content = response['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(content))
 elif mode == 'local':
-    df = pd.read_json(BULK_DATA_PATH)
+    df = pd.read_json(BULK_DATA_BUCKET_OR_PATH)
     s3_client = None
 
 #This script was running on 3 different instances for more than a week. It won't be needed if you want to pull less than 5m urls probably,
@@ -40,7 +40,7 @@ os.makedirs(LOCAL_TMP_DIR, exist_ok=True)
 df['batchid']=df.index//1000
 
 #I used this block just several times, when kernel died for unknown reasons and I wanted to continue from where I left off.
-batch_to_start_from = get_max_batch_N(s3_client, BUCKET_TO_SAVE, mode)
+batch_to_start_from = get_max_batch_N(s3_client, BUCKET_OR_PATH_TO_SAVE, mode)
 if batch_to_start_from>0:
     batch_to_start_from=batch_to_start_from+1
 df = df[df['batchid']>=batch_to_start_from]
@@ -58,7 +58,7 @@ def main():
             executor.map(retrieve, batch)
 
         txts = [f for f in os.listdir('txt_output') if f.endswith('txt')]
-        unite_txts(txts, f'{batchid+batch_to_start_from}_n_{uuid.uuid4()}', s3_client, BUCKET_TO_SAVE)
+        unite_txts(txts, f'{batchid+batch_to_start_from}_n_{uuid.uuid4()}', s3_client, BUCKET_OR_PATH_TO_SAVE)
 
 if __name__ == "__main__":
     main()
