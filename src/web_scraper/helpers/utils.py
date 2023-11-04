@@ -31,7 +31,7 @@ def retrieve(url):
         pass
 
 
-def unite_txts(txts, uuid, s3_client, bucket_name):
+def unite_txts(txts, uuid, client_or_none, bucket_or_directory):
     data = []
     for url in txts:
         with open('{LOCAL_TMP_DIR}/'+url, encoding="utf-8") as f:
@@ -40,15 +40,23 @@ def unite_txts(txts, uuid, s3_client, bucket_name):
         url=url.strip('.txt')
         data.append({'url':url,'text':text})
     df = pd.DataFrame(data)
-    write_df_to_s3(df, bucket_name,f'{uuid}.parquet', s3_client)
+    write_df(df, bucket_or_directory, f'{uuid}.parquet', client_or_none, mode='s3')
 
 
-def write_df_to_s3(df,s3_bucket, s3_object_key, s3_client):
-    parquet_buffer = BytesIO()
-    pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
-    # Upload Parquet file to S3
-    parquet_buffer.seek(0)
-    s3_client.upload_fileobj(parquet_buffer, s3_bucket, s3_object_key)
+
+def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='s3'):
+    if mode == 's3':
+        parquet_buffer = BytesIO()
+        pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
+        # Upload Parquet file to S3
+        parquet_buffer.seek(0)
+        client_or_none.upload_fileobj(parquet_buffer, bucket_or_directory, object_key_or_path)
+    elif mode == 'local':
+        # Write to local file system
+        local_path = os.path.join(bucket_or_directory, object_key_or_path)
+        pq.write_table(pa.Table.from_pandas(df), local_path)
+    else:
+        raise ValueError("Invalid mode specified. Use 's3' or 'local'.")
 
 
 #This is needed if parsing was interrupted and you are continueing download from the previous batch. 

@@ -28,18 +28,13 @@ if mode == 's3':
     df = pd.read_csv(StringIO(content))
 elif mode == 'local':
     df = pd.read_json(BULK_DATA_PATH)
+    s3_client = None
 
 #This script was running on 3 different instances for more than a week. It won't be needed if you want to pull less than 5m urls probably,
 # or if time is not your priority.
 
 
 os.makedirs(LOCAL_TMP_DIR, exist_ok=True)
-
-
-
-
-
-
 
 #I group urls in 1000s.
 df['batchid']=df.index//1000
