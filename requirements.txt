@@ -1,6 +1,0 @@
-onnxruntime
-numpy
-transformers
-torch
-pickle
-pathlib
