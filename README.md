@@ -2,7 +2,17 @@
 
 **This project is currently under construction.**
 
-# DATA GATHERING
+## How to Test with UI
+
+Just run
+
+```
+docker-compose up
+```
+
+and open http://localhost:8000/ with browser.
+
+## DATA GATHERING
 
 Here are some datasets I found. Currently using Tranco and DomCorp datasets.
 
