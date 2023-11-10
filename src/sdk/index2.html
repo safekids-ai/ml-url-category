@@ -11,7 +11,7 @@
     />
     <style>
       body {
-        background-image: url("safekids.webp");
+        background-image: url("/static/safekids.webp");
         background-size: cover;
         background-position: top center;
         background-repeat: no-repeat;
@@ -61,7 +61,6 @@
         <!-- The result will be displayed here -->
       </div>
     </div>
-
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("websiteClassifierForm");
@@ -69,18 +68,17 @@
           event.preventDefault(); // Prevent the default form submission
           const websiteUrl = document.getElementById("websiteInput").value;
 
-          fetch("/check-website", {
+          fetch("http://localhost:8000/predict/", {
+            // Updated URL
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ websiteUrl: websiteUrl }),
+            body: JSON.stringify({ text: websiteUrl }), // Update to match the FastAPI expected format
           })
             .then((response) => response.json())
             .then((data) => {
-              // Assuming the Lambda function returns a JSON with the classification result
-              document.getElementById("result").textContent =
-                data.classification;
+              document.getElementById("result").textContent = data.prediction; // Adjust according to your server's response
             })
             .catch((error) => {
               console.error("Error:", error);
@@ -90,6 +88,5 @@
         };
       });
     </script>
-    
   </body>
 </html>
