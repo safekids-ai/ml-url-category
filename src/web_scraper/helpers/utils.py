@@ -31,16 +31,16 @@ def retrieve(url):
         pass
 
 
-def unite_txts(txts, uuid, client_or_none, bucket_or_directory):
+def unite_txts(txts, uuid, client_or_none, bucket_or_directory,mode):
     data = []
     for url in txts:
-        with open('{LOCAL_TMP_DIR}/'+url, encoding="utf-8") as f:
+        with open(f'{LOCAL_TMP_DIR}/'+url, encoding="utf-8") as f:
             text = f.read()
-        os.remove('{LOCAL_TMP_DIR}/'+url)
+        os.remove(f'{LOCAL_TMP_DIR}/'+url)
         url=url.strip('.txt')
         data.append({'url':url,'text':text})
     df = pd.DataFrame(data)
-    write_df(df, bucket_or_directory, f'{uuid}.parquet', client_or_none, mode='s3')
+    write_df(df, bucket_or_directory, f'{uuid}.parquet', client_or_none, mode)
 
 
 
