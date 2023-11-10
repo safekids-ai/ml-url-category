@@ -4,13 +4,19 @@
 
 ## How to Test with UI
 
-Just run
+open terminal and run
+
+```
+bash setup.sh
+```
+
+then
 
 ```
 docker-compose up
 ```
 
-and open http://localhost:8000/ with browser.
+and then open http://localhost:8000/ with browser.
 
 ## DATA GATHERING
 
