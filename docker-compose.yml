@@ -1,6 +1,27 @@
 version: "3.8"
 
 services:
+  mariadb:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: your_password
+      MYSQL_DATABASE: your_database_name
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mariadb_data:/var/lib/mysql
+      - ./src/mariadb_init_scripts:/docker_entrypoint_initdb.d  # Mount init scripts directory
+    command: --init-file /docker_entrypoint_initdb.d/init.sql
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+      - ./redis-init-scripts:/docker-entrypoint-initdb.d  # Mount init scripts directory
+    command: ["/bin/bash", "/scripts/init_redis.sh"]
+
   web:
     build: .
     ports:
@@ -9,3 +30,9 @@ services:
       - ./src/container:/app
       - ./model_binary:/app/model
       - ./src/sdk:/app/sdk
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      DATABASE_URL: mysql+mysqlclient://${DB_USERNAME}:${DB_PASSWORD}@mariadb/your_database_name
+      REDIS_URL: redis://redis
