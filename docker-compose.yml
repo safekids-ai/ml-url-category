@@ -8,4 +8,4 @@ services:
     volumes:
       - ./src/container:/app
       - ./model_binary:/app/model
-      - ./src/sdk:/app/sdk
+      - ./src/sdk_docker:/app/sdk

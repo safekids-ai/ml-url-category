@@ -52,14 +52,20 @@ ENCODER_PATH = '/app/model/encoder.pkl'
 with open(ENCODER_PATH, 'rb') as f:
     encoder = pickle.load(f)
 
-session = onnxruntime.InferenceSession(ONNX_MODEL_PATH, providers=['CUDAExecutionProvider'])
+
+providers = onnxruntime.get_available_providers()
+if 'CUDAExecutionProvider' in providers:
+    session = onnxruntime.InferenceSession(ONNX_MODEL_PATH, providers=['CUDAExecutionProvider'])
+else:
+    session = onnxruntime.InferenceSession(ONNX_MODEL_PATH, providers=['CPUExecutionProvider'])
+# session = onnxruntime.InferenceSession(ONNX_MODEL_PATH, providers=['CUDAExecutionProvider','CPUExecutionProvider'])
 
 class Item(BaseModel):
     text: str
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index():
-    return Path("/app/sdk/index2.html").read_text()
+    return Path("/app/sdk/index.html").read_text()
 
 def retrieve_text(url):
     if not urlparse(url).scheme:
