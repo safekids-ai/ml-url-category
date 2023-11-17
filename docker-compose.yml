@@ -1,29 +1,45 @@
 version: "3.8"
 
 services:
-  mariadb:
-    image: mariadb
+  db:
+    image: mariadb:latest
+    restart: always
+    env_file:
+      - /.env
     environment:
-      MYSQL_ROOT_PASSWORD: your_password
-      MYSQL_DATABASE: your_database_name
-    ports:
-      - "3306:3306"
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
       - ./mariadb_data:/var/lib/mysql
-      - ./src/mariadb_init_scripts:/docker_entrypoint_initdb.d  # Mount init scripts directory
-    command: --init-file /docker_entrypoint_initdb.d/init.sql
-
-  redis:
-    image: redis
     ports:
-      - "6379:6379"
-    volumes:
-      - ./redis_data:/data
-      - ./src/redis_init_scripts:/docker-entrypoint-initdb.d  # Mount init scripts directory
-    command: ["/bin/bash", "/scripts/init_redis.sh"]
+      - "3306:3306"
+  python-app:
+    build:
+      context: .
+      dockerfile: /src/mariadb_init_scripts/dockerfile_load_data
+    depends_on:
+      - db
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+
+  # redis:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfile-redis
+  #   ports:
+  #     - "6379:6379"
+  #   depends_on:
+  #     - db
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile-model
     ports:
       - "8000:8000"
     volumes:
@@ -31,8 +47,9 @@ services:
       - ./model_binary:/app/model
       - ./src/sdk:/app/sdk
     depends_on:
-      - mariadb
+      - db
       - redis
     environment:
-      DATABASE_URL: mysql+mysqlclient://${DB_USERNAME}:${DB_PASSWORD}@mariadb/your_database_name
-      REDIS_URL: redis://redis
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
