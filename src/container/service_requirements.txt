@@ -8,3 +8,5 @@ scikit-learn
 uvicorn
 requests
 beautifulsoup4
+mysql-connector-python
+python-dotenv
