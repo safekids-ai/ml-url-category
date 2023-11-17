@@ -3,4 +3,5 @@
 *.ipynb
 __pycache__/
 .env
-mariadb_data
+mariadb_data/*
+!mariadb_data/.gitkeep
