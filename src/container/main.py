@@ -11,6 +11,10 @@ from transformers import AutoTokenizer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from urllib.parse import urlparse
+import redis
+import os
+import json
+
 
 headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -41,6 +45,10 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+
+r = redis.Redis(host='redis', port=6379, decode_responses=True,password=REDIS_PASSWORD)
 
 # Load your model and tokenizer here
 tokenizer_checkpoint = "xlm-roberta-base"
@@ -81,14 +89,21 @@ def retrieve_text(url):
     else:
         raise Exception("Error connecting to the website")
 
+def check_cache(url):
+    return r.get(url)
+ 
 
 @app.post("/predict/")
 def predict(item: Item):
     url = item.text
-    text = retrieve_text(url)
-    inputs = tokenizer(text, return_tensors="np", max_length=512, truncation=True, padding=True)
-    onnx_inputs = {k: v for k, v in inputs.items() if k in [i.name for i in session.get_inputs()]}
-    outputs = session.run(None, onnx_inputs)[0]
-    probabilities = np.exp(outputs) / np.sum(np.exp(outputs), axis=1, keepdims=True)
-    pred_class = encoder.classes_[np.argmax(probabilities, axis=1)]
-    return {"prediction": pred_class.tolist()}
+    cache_res = check_cache(url)
+    if cache_res:
+        return json.loads(cache_res)
+    else:
+        text = retrieve_text(url)
+        inputs = tokenizer(text, return_tensors="np", max_length=512, truncation=True, padding=True)
+        onnx_inputs = {k: v for k, v in inputs.items() if k in [i.name for i in session.get_inputs()]}
+        outputs = session.run(None, onnx_inputs)[0]
+        probabilities = np.exp(outputs) / np.sum(np.exp(outputs), axis=1, keepdims=True)
+        pred_class = encoder.classes_[np.argmax(probabilities, axis=1)]
+        return {"prediction": pred_class.tolist()}
