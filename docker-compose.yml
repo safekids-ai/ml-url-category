@@ -15,10 +15,11 @@ services:
       - ./mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
-  python-app:
+
+  load_data_in_mariadb:
     build:
       context: .
-      dockerfile: /src/mariadb_init_scripts/dockerfile_load_data
+      dockerfile: /src/mariadb_init_scripts/dockerfile-load-data-mariadb
     depends_on:
       - db
     environment:
@@ -26,16 +27,32 @@ services:
       MARIADB_DATABASE: ${MARIADB_DATABASE}
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - ./shared_data:/var/shared
 
-  # redis:
-  #   build:
-  #     context: .
-  #     dockerfile: dockerfile-redis
-  #   ports:
-  #     - "6379:6379"
-  #   depends_on:
-  #     - db
+  redis:
+    image: redis:latest
+    restart: always
+    env_file:
+      - /.env
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./redis_data:/data
 
+  load_data_in_redis:
+    build:
+      context: .
+      dockerfile: /src/redis_init_scripts/dockerfile-load-data-redis
+    depends_on:
+      - db
+      - redis
+      - load_data_in_mariadb
+    env_file:
+      - /.env
+    volumes:
+      - ./shared_data:/var/shared
   web:
     build:
       context: .
@@ -49,7 +66,5 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      MARIADB_DATABASE: ${MARIADB_DATABASE}
-      MARIADB_USER: ${MARIADB_USER}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    env_file:
+      - /.env
