@@ -12,5 +12,6 @@ echo "Loading Data to MariaDB"
 # Run your Python script
 python load_data.py
 
+touch /var/shared/done.txt
 # Exit the script
 exit 0
