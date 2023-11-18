@@ -5,3 +5,6 @@ __pycache__/
 .env
 mariadb_data/*
 !mariadb_data/.gitkeep
+
+redis_data/*
+!redis_data/.gitkeep
