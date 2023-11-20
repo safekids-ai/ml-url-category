@@ -81,7 +81,7 @@ def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='
 
 
 #This is needed if parsing was interrupted and you are continueing download from the previous batch. 
-def get_max_batch_N(s3, bucket_or_directory, mode):
+def get_max_batch_N(s3, bucket_or_directory, mode, instance_id):
     files = []
     # Create a paginator for listing objects in the S3 bucket
     if mode=='s3':
@@ -94,8 +94,7 @@ def get_max_batch_N(s3, bucket_or_directory, mode):
             if "Contents" in page:
                 for obj in page["Contents"]:
                     filename = obj["Key"]
-                    # Check if the filename starts with '1_n'
-                    if filename.endswith('.zip'):
+                    if filename.endswith('.zip') & filename.startswith(instance_id):
                         files.append(filename.split('n')[0].split('_')[0])
         files=[file for file in files if file!='']
         files=[int(file) for file in files]
