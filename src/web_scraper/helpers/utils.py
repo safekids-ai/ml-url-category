@@ -7,25 +7,46 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from io import BytesIO
 from helpers.config import PROTOCOLS, LOCAL_TMP_DIR
+import zipfile
 
-
+def write_zip(zip_filename,txts,client_or_none,bucket_name):
+    with zipfile.ZipFile('txt_output/' + zip_filename, 'w') as zipf:
+        for file in txts:
+            zipf.write(file, os.path.basename(file))
+    if client_or_none:
+        client_or_none.upload_file('txt_output/' + zip_filename, bucket_name, zip_filename)
+        os.remove('txt_output/'+zip_filename)
+    
 #retrieval function which will be called by ThreadPoolExecutor
+# def retrieve(url):
+#     def process_resp(response):
+#         soup = BeautifulSoup(response.text,'html.parser')
+#         text = soup.text.strip()
+#         text = re.sub('[\n\t\r]+', '\n', text)
+#         text = re.sub('s+', ' ', text)
+#         return text
+#     try:
+#         # Try both HTTP and HTTPS protocols to retrieve the content
+#         for protocol in PROTOCOLS:
+#             r = requests.get(protocol+url, timeout=2)
+#             if r.status_code == 200:
+#                 text = process_resp(r)
+#                 # Save the retrieved text to a file
+#                 with open(f'{LOCAL_TMP_DIR}/{url}.txt', "w", encoding="utf-8") as file:
+#                     file.write(text)
+#             break
+#     except:
+#         pass
+
 def retrieve(url):
-    def process_resp(response):
-        soup = BeautifulSoup(response.text,'html.parser')
-        text = soup.text.strip()
-        text = re.sub('[\n\t\r]+', '\n', text)
-        text = re.sub('s+', ' ', text)
-        return text
     try:
         # Try both HTTP and HTTPS protocols to retrieve the content
         for protocol in PROTOCOLS:
-            r = requests.get(protocol+url, timeout=2)
+            r = requests.get(protocol+url, timeout=5)
             if r.status_code == 200:
-                text = process_resp(r)
-                # Save the retrieved text to a file
-                with open(f'{LOCAL_TMP_DIR}/{url}.txt', "w", encoding="utf-8") as file:
-                    file.write(text)
+#                 text = process_resp(r)
+                with open(f'{LOCAL_TMP_DIR}/{url}.html', "w", encoding="utf-8") as file:
+                    file.write(r.text)
             break
     except:
         pass
@@ -74,8 +95,8 @@ def get_max_batch_N(s3, bucket_or_directory, mode):
                 for obj in page["Contents"]:
                     filename = obj["Key"]
                     # Check if the filename starts with '1_n'
-                    if filename.endswith('.parquet'):
-                        files.append(filename.split('n')[0].split('_')[1])
+                    if filename.endswith('.zip'):
+                        files.append(filename.split('n')[0].split('_')[0])
         files=[file for file in files if file!='']
         files=[int(file) for file in files]
         if files == []:
@@ -83,7 +104,7 @@ def get_max_batch_N(s3, bucket_or_directory, mode):
     elif mode=='local':
         # List files in the local directory
         for filename in os.listdir(bucket_or_directory):
-            if filename.endswith('.parquet'):
+            if filename.endswith('.zip'):
                 try:
                     batch_number = int(filename.split('n')[0].split('_')[1])
                     files.append(batch_number)

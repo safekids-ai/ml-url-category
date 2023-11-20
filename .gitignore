@@ -1,6 +1,7 @@
 *.onnx
 *.pkl
 *.ipynb
+!src/web_scraper/scrape.ipynb
 __pycache__/
 .env
 mariadb_data/*
