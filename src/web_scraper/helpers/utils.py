@@ -6,7 +6,7 @@ import os
 import pyarrow as pa
 import pyarrow.parquet as pq
 from io import BytesIO
-from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_DIR_ZIP
+from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_DIR_ZIP, headers
 import zipfile
 
 def write_zip(zip_filename,txts,client_or_none,bucket_name):
@@ -42,7 +42,7 @@ def retrieve(url):
     try:
         # Try both HTTP and HTTPS protocols to retrieve the content
         for protocol in PROTOCOLS:
-            r = requests.get(protocol+url, timeout=5)
+            r = requests.get(protocol+url,headers=headers, timeout=5)
             if r.status_code == 200:
 #                 text = process_resp(r)
                 with open(f'{LOCAL_TMP_DIR}/{url}.html', "w", encoding="utf-8") as file:
