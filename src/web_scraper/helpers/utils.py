@@ -14,7 +14,7 @@ def write_zip(zip_filename,txts,client_or_none,bucket_name):
         for file in txts:
             zipf.write(file, os.path.basename(file))
     if client_or_none:
-        client_or_none.upload_file('txt_output/' + zip_filename, bucket_name, zip_filename)
+        client_or_none.upload_file(f'{LOCAL_TMP_DIR_ZIP}/' + zip_filename, bucket_name, zip_filename)
         os.remove(f'{LOCAL_TMP_DIR_ZIP}/'+zip_filename)
     
 #retrieval function which will be called by ThreadPoolExecutor
