@@ -95,7 +95,7 @@ def get_max_batch_N(s3, bucket_or_directory, mode, instance_id):
                 for obj in page["Contents"]:
                     filename = obj["Key"]
                     if filename.endswith('.zip') & filename.startswith(str(instance_id)):
-                        files.append(filename.split('n')[1].split('_')[0])
+                        files.append(filename.split('n')[0].split('_')[1])
         files=[file for file in files if file!='']
         files=[int(file) for file in files]
         if files == []:
