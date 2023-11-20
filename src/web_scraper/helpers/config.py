@@ -5,6 +5,7 @@ PROTOCOLS = ["https://","http://"]
 FILE_KEY = 'domain_part_{}.txt'
 
 LOCAL_TMP_DIR = "txt_output"
+LOCAL_TMP_DIR_ZIP = 'zips'
 
 BULK_DATA_BUCKET_OR_PATH = 'batch-urls'
 
