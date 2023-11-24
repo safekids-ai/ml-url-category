@@ -94,6 +94,9 @@ def unite_txts(txts, uuid, client_or_none, bucket_or_directory,mode):
 
 
 def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='s3'):
+    for column in df.columns[2:-1]:#all cols except url,title and visible_text.
+        df[column] = df[column].apply(lambda x: x if isinstance(x, list) else [x])
+
     if mode == 's3':
 
         parquet_buffer = BytesIO()
