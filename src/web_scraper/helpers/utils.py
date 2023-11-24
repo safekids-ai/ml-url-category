@@ -108,7 +108,7 @@ def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='
     elif mode == 'local':
         # Write to local file system
         local_path = os.path.join(bucket_or_directory, object_key_or_path)
-        pq.write_table(pa.Table.from_pandas(df), local_path)
+        df.to_parquet(local_path, index=False)
     else:
         raise ValueError("Invalid mode specified. Use 's3' or 'local'.")
 
