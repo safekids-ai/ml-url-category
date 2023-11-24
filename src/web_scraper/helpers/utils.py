@@ -101,20 +101,19 @@ def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='
             df[column] = df[column].apply(lambda x: x if isinstance(x, list) else [x])
 
     if mode == 's3':
-
-        parquet_buffer = BytesIO()
-        df.to_parquet(parquet_buffer, index=False)
-        parquet_buffer.seek(0)
-
-        # parquet_buffer = BytesIO()
-        # pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
-        # # Upload Parquet file to S3
-        # parquet_buffer.seek(0)
-        client_or_none.upload_fileobj(parquet_buffer, bucket_or_directory, object_key_or_path)
+        try:
+            parquet_buffer = BytesIO()
+            df.to_parquet(parquet_buffer, index=False)
+            parquet_buffer.seek(0)
+            client_or_none.upload_fileobj(parquet_buffer, bucket_or_directory, object_key_or_path)
+        except:
+            pass
     elif mode == 'local':
-        # Write to local file system
-        local_path = os.path.join(bucket_or_directory, object_key_or_path)
-        df.to_parquet(local_path, index=False)
+        try:
+            local_path = os.path.join(bucket_or_directory, object_key_or_path)
+            df.to_parquet(local_path, index=False)
+        except:
+            pass
     else:
         raise ValueError("Invalid mode specified. Use 's3' or 'local'.")
 
