@@ -95,10 +95,15 @@ def unite_txts(txts, uuid, client_or_none, bucket_or_directory,mode):
 
 def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='s3'):
     if mode == 's3':
+
         parquet_buffer = BytesIO()
-        pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
-        # Upload Parquet file to S3
+        df.to_parquet(parquet_buffer, index=False)
         parquet_buffer.seek(0)
+
+        # parquet_buffer = BytesIO()
+        # pq.write_table(pa.Table.from_pandas(df), parquet_buffer)
+        # # Upload Parquet file to S3
+        # parquet_buffer.seek(0)
         client_or_none.upload_fileobj(parquet_buffer, bucket_or_directory, object_key_or_path)
     elif mode == 'local':
         # Write to local file system
