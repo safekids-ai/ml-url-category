@@ -1,5 +1,6 @@
 *.onnx
 *.pkl
+*.parquet
 *.ipynb
 !src/web_scraper/scrape.ipynb
 __pycache__/
@@ -9,3 +10,4 @@ mariadb_data/*
 
 redis_data/*
 !redis_data/.gitkeep
+
