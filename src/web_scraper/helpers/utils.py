@@ -8,46 +8,23 @@ import json
 import pyarrow as pa
 import pyarrow.parquet as pq
 from io import BytesIO
-from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_DIR_ZIP, LOCAL_TMP_TXT_PATH, headers
-import zipfile
+from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_TXT_PATH, headers
 
-def write_zip(zip_filename,txts,client_or_none,bucket_name):
-    with zipfile.ZipFile(f'{LOCAL_TMP_DIR_ZIP}/' + zip_filename, 'w') as zipf:
-        for file in txts:
-            zipf.write(file, os.path.basename(file))
-    if client_or_none:
-        client_or_none.upload_file(f'{LOCAL_TMP_DIR_ZIP}/' + zip_filename, bucket_name, zip_filename)
-        os.remove(f'{LOCAL_TMP_DIR_ZIP}/'+zip_filename)
-    
 def write_parquet(uuid, client_or_none, bucket_or_directory,mode):
+    # with open(LOCAL_TMP_TXT_PATH, encoding="utf-8") as f:
+    #     dict_list = [json.loads(line.strip()) for line in f.readlines()]
+    dict_list = []
     with open(LOCAL_TMP_TXT_PATH, encoding="utf-8") as f:
-        dict_list = [json.loads(line.strip()) for line in f.readlines()]
+        for line in f.readlines():
+            try:
+                dict_list.append(json.loads(line.strip()))
+            except:
+                pass
+
     # Creating a DataFrame from the list of dictionaries
     df = pd.DataFrame(dict_list)
     os.remove(LOCAL_TMP_TXT_PATH)
     write_df(df, bucket_or_directory, f'{uuid}.parquet', client_or_none, mode)
-
-#retrieval function which will be called by ThreadPoolExecutor
-# def retrieve(url):
-#     def process_resp(response):
-#         soup = BeautifulSoup(response.text,'html.parser')
-#         text = soup.text.strip()
-#         text = re.sub('[\n\t\r]+', '\n', text)
-#         text = re.sub('s+', ' ', text)
-#         return text
-#     try:
-#         # Try both HTTP and HTTPS protocols to retrieve the content
-#         for protocol in PROTOCOLS:
-#             r = requests.get(protocol+url, timeout=2)
-#             if r.status_code == 200:
-#                 text = process_resp(r)
-#                 # Save the retrieved text to a file
-#                 with open(f'{LOCAL_TMP_DIR}/{url}.txt', "w", encoding="utf-8") as file:
-#                     file.write(text)
-#             break
-#     except:
-#         pass
-
 
 def tag_visible(element):
     if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
@@ -69,10 +46,6 @@ def extract_standard_tags(response,url):
     paragraphs = [tag.get_text() for tag in soup.find_all('p')]
     list_items = [tag.get_text() for tag in soup.find_all('li')]
     bold_texts = [tag.get_text() for tag in soup.find_all(['b', 'strong'])]
-    # italic_texts = [tag.get_text() for tag in soup.find_all(['i', 'em'])]
-    # blockquotes = [tag.get_text() for tag in soup.find_all('blockquote')]
-    # comments = [str(comment) for comment in soup.find_all(string=lambda text: isinstance(text, Comment))]
-
     texts = soup.findAll(text=True)
     visible_texts = filter(tag_visible, texts)
     visible_text = u" ".join(t.strip() for t in visible_texts)
@@ -86,9 +59,6 @@ def extract_standard_tags(response,url):
         'paragraphs': paragraphs,
         'list_items': list_items,
         'bold_texts': bold_texts,
-        # 'italic_texts': italic_texts,
-        # 'blockquotes': blockquotes,
-        # 'comments': comments,
         'visible_text': visible_text
     }
 
@@ -103,11 +73,8 @@ def retrieve(url):
         for protocol in PROTOCOLS:
             r = requests.get(protocol+url,headers=headers, timeout=5)
             if r.status_code == 200:
-                data = extract_standard_tags(r)
-                append_to_tmp_txt(LOCAL_TMP_TXT_PATH, data)
-                # with open(f'{LOCAL_TMP_DIR}/{url}.html', "w", encoding="utf-8") as file:
-                #     file.write(r.text)
-                
+                data = extract_standard_tags(r,url)
+                append_to_tmp_txt(LOCAL_TMP_TXT_PATH, data)              
             break
     except:
         pass
