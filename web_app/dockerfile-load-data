@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Install MariaDB client
+RUN apk add --no-cache mariadb-client
+
+# Copy the shell script that will import the data
+COPY /database/import-data.sh /usr/local/bin/import-data.sh
+COPY /database/data/mariadb_data.csv /usr/local/bin/data/mariadb_data.csv
+
+
+RUN chmod +x /usr/local/bin/import-data.sh
+
+
+CMD ["/usr/local/bin/import-data.sh"]
+
+# CMD ["tail", "-f", "/dev/null"]

@@ -1,0 +1,13 @@
+fastapi
+pydantic
+pickle5
+onnxruntime
+numpy
+transformers
+scikit-learn
+uvicorn
+requests
+beautifulsoup4
+mysql-connector-python
+python-dotenv
+redis
