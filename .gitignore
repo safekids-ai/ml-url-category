@@ -10,11 +10,11 @@ web_app/tiny_model/tokenizer/vocab.txt
 !src/web_scraper/scrape.ipynb
 __pycache__/
 .env
-mariadb_data/*
-!mariadb_data/.gitkeep
+web_app/database/mariadb_data/*
+!web_app/database/mariadb_data/.gitkeep
 
-redis_data/*
-!redis_data/.gitkeep
+web_app/database/redis_data/*
+!web_app/database/redis_data/.gitkeep
 
 model_binary/*
 !model_binary/.gitkeep
