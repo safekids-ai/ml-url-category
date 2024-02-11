@@ -14,7 +14,7 @@ web_app/database/mariadb_data/*
 
 web_app/database/redis_data/*
 !web_app/database/redis_data/.gitkeep
-
+# .env
 model_binary/*
 !model_binary/.gitkeep
 !model_binary/large/.gitkeep

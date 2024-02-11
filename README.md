@@ -4,20 +4,26 @@
 
 ## How to Test with UI
 
-AWS CLI
-.env
+You will need AWS CLI installed on your computer for setup.sh to work.
 
 open terminal and run
 
 ```
-bash setup.sh --modes
+bash setup.sh
 ```
+
+it will download 5m urls for mariadb and tiny model for infering new websites.
+
+you can use `--large-model` flag for downloading larger and better quality model and `--parsed-data` to download raw training(136K) and 5m urls data.
+Those are optional and are not needed for basic usage of service.
 
 then
 
 ```
 docker-compose up
 ```
+
+note that .env is pushed on the repo. This practice is not encouraged, but this is just a demonstration of how you can store sensitive information of your project, and **do not forget to uncomment .env in .gitignore**
 
 and then open http://localhost:8000/ with browser.
 
