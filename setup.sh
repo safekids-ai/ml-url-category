@@ -1,29 +1,40 @@
 #!/bin/bash
 
-# Function to download a file from Google Drive
-download_from_google_drive() {
-    file_id=$1
-    file_path=$2
+# Initialize download flag
+DOWNLOAD_ALL=false
 
-    # Check if the file already exists
-    if [ -f "$file_path" ]; then
-        echo "File $file_path already exists, skipping download."
-    else
-        # Getting the confirmation token needed for large files
-        confirm_token=$(curl -sL -c /tmp/cookies.txt "https://drive.google.com/uc?export=download&id=${file_id}" | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')
+# Check for "--rawdata true" flag
+if [[ "$1" == "--parsed-data" && "$2" == "true" ]]; then
+  DOWNLOAD_ALL=true
+fi
 
-        # Downloading the file
-        curl -Lb /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=${confirm_token}&id=${file_id}" -o ${file_path}
+# Define your S3 bucket URL
+BUCKET_URL="https://ml-url-category-safekids-ai-large-files.s3.amazonaws.com"
 
-        # Cleaning up
-        rm -rf /tmp/cookies.txt
-        echo "Downloaded $file_path."
-    fi
-}
+# Define key-file pairs
+declare -A KEY_FILE_MAP=(
+  ["mariadb_data.csv"]="web_app/database/data"
+  ["tiny_model"]="web_app/tiny_model"
+  ["parsed_data"]="parsed_data/"
+  ["large_model"]="modeling/large_model"
+)
 
-# Download files
-download_from_google_drive "1-10_d96h__tLxTdkIk0fmkZdPyBEDWQp" "./model_binary/model.onnx"
-download_from_google_drive "1r1rNR6lJRu_Wk3zQpQxoogS7o0u9FxJ1" "./model_binary/encoder.pkl"
+# Optionally, define keys to skip when not downloading everything
+SKIP_KEYS=("s3-key-path-2")
 
+# Iterate over the key-file map and download each file
+for KEY in "${!KEY_FILE_MAP[@]}"; do
+  # Skip certain downloads if not downloading everything
+  if [ "$DOWNLOAD_ALL" = false ] && [[ " ${SKIP_KEYS[@]} " =~ " ${KEY} " ]]; then
+    echo "Skipping $KEY"
+    continue
+  fi
+  FILE="${KEY_FILE_MAP[$KEY]}"
+  # Create directory if it doesn't exist
+  mkdir -p "$(dirname "$FILE")"
+  # Download the file
+  echo "Downloading $KEY to $FILE"
+  curl "${BUCKET_URL}/${KEY}" -o "$FILE"
+done
 
-echo "All file download attempts completed."
+echo "All files have been downloaded."
