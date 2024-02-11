@@ -4,10 +4,13 @@
 
 ## How to Test with UI
 
+AWS CLI
+.env
+
 open terminal and run
 
 ```
-bash setup.sh
+bash setup.sh --modes
 ```
 
 then
