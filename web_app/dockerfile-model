@@ -1,23 +1,32 @@
 FROM python:3.8
 
-# Set the working directory
+
 WORKDIR /app
 
-# Install dependencies
+
 COPY ./service/service_requirements.txt /app/service_requirements.txt
 
 RUN pip install --upgrade pip
 
 RUN pip install -r service_requirements.txt
 
-# Copy your FastAPI app
-COPY ./service/main.py /app/main.py
-COPY ./service/service_config.py /app/service_config.py
-COPY ./service/service_utils.py /app/service_utils.py
+RUN apt-get update && \
+    apt-get install -y default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY ./tiny_model/encoder.pkl /app/model/encoder.pkl
-COPY ./tiny_model/model.onnx /app/model/model.onnx
-COPY ./tiny_model/tokenizer /app/model/tokenizer
 
-# Command to run the server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY ./service/main.py /app/service/main.py
+COPY ./service/service_config.py /app/service/service_config.py
+COPY ./service/service_utils.py /app/service/service_utils.py
+
+COPY ./tiny_model/encoder.pkl /app/tiny_model/encoder.pkl
+COPY ./tiny_model/model.onnx /app/tiny_model/model.onnx
+COPY ./tiny_model/tokenizer /app/tiny_model/tokenizer
+
+ENV PYTHONPATH="${PYTHONPATH}:/app/service"
+
+COPY ./service/start.sh /app/start.sh
+
+RUN chmod +x /app/start.sh
+
+ENTRYPOINT ["/app/start.sh"]

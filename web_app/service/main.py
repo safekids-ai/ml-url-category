@@ -17,14 +17,12 @@ import json
 import re
 
 from service_utils import init_redis, load_tokenizer_and_encoder, load_model, check_cache, retrieve_from_web, retrieve_from_db, init_mariadb, remove_www, set_cache, set_db
-# from service_config import HEADERS, REDIS_PASSWORD
-# from service_config import TOKENIZER_CHECKPOINT, ONNX_MODEL_PATH, ENCODER_PATH
 
 
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="/app/sdk"), name="static")
+app.mount("/static", StaticFiles(directory="/app/assets"), name="static")
 
 # Set up CORS
 app.add_middleware(
@@ -49,7 +47,7 @@ class Item(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index():
-    return Path("/app/sdk/index.html").read_text()
+    return Path("/app/assets/index.html").read_text()
 
 
 @app.post("/predict/")

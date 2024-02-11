@@ -5,16 +5,14 @@ services:
     image: mariadb:latest
     restart: always
     env_file:
-      - /.env
+      - ./.env
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${MARIADB_DATABASE}
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
-    # volumes:
-    #   - mariadb_data:/var/lib/mysql
     volumes:
-      - ./mariadb_data:/var/lib/mysql
+      - ./database/mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
 
@@ -30,18 +28,18 @@ services:
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
-      - ./data:/data
+      - ./database/data:/data
 
   redis:
     image: redis:latest
     restart: always
     env_file:
-      - /.env
+      - .env
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
-      - ./redis_data:/data
+      - ./database/redis_data:/data
 
   web:
     build:
@@ -50,11 +48,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./service:/app
-      - ./tiny_model:/app/model
-      - ./sdk:/app/sdk
+      - ./service:/app/service
+      - ./assets:/app/assets
+      - ./tiny_model:/app/tiny_model
     depends_on:
-      - db
+      - mariadb
       - redis
     env_file:
-      - /.env
+      - .env

@@ -26,7 +26,7 @@ def init_mariadb():
     password = MARIADB_PASSWORD,
     database = MARIADB_DATABASE 
 )
-
+ 
 # Load ONNX model
 def load_model():
     providers = onnxruntime.get_available_providers()
