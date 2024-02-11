@@ -1,0 +1,7 @@
+onnxruntime
+numpy
+transformers
+datasets
+torch
+pickle
+pathlib
