@@ -7,9 +7,9 @@ RUN apk add --no-cache mariadb-client
 COPY /database/import-data.sh /usr/local/bin/import-data.sh
 COPY /database/data/mariadb_data.csv /usr/local/bin/data/mariadb_data.csv
 
+RUN sed -i 's/\r$//' /usr/local/bin/import-data.sh
 
 RUN chmod +x /usr/local/bin/import-data.sh
-
 
 CMD ["/usr/local/bin/import-data.sh"]
 
