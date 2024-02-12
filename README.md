@@ -17,9 +17,11 @@ it will download 5m urls for mariadb and tiny model for infering new websites.
 you can use `--large-model` flag for downloading larger and better quality model and `--parsed-data` to download raw training(136K) and 5m urls data.
 Those are optional and are not needed for basic usage of service.
 
-then
+then:
 
 ```
+cd web_app
+
 docker-compose up
 ```
 
