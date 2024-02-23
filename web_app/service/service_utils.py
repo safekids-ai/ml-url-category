@@ -122,19 +122,15 @@ def retrieve_from_db(cursor,url):
     return rows
 
 def set_cache(redis_conn, url, class_number):
-    # try:
-    redis_conn.set(url, class_number, ex=3600)
-    print('aaaa')
-    # except:
-    #     print('aaaa1')
-    #     pass
+    try:
+        redis_conn.set(url, class_number, ex=3600)
+    except:
+        pass
 
 def set_db(mariadb_conn, cursor, url, class_number, probability):
-    # try:
-    query = f"INSERT INTO {TABLE_NAME} (url, label, probability) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE label = VALUES(label), probability = VALUES(probability)"
-    cursor.execute(query, (url, class_number, probability))
-    mariadb_conn.commit()
-    print('bbbbbbbb')
-    # except:
-    #     print('bbbbbbbb1')
-    #     pass
+    try:
+        query = f"INSERT INTO {TABLE_NAME} (url, label, probability) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE label = VALUES(label), probability = VALUES(probability)"
+        cursor.execute(query, (url, class_number, probability))
+        mariadb_conn.commit()
+    except:
+        pass

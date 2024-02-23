@@ -1,20 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import requests
-from bs4 import BeautifulSoup
 from pathlib import Path
 from pydantic import BaseModel
-import pickle
-import onnxruntime
-import numpy as np
-from transformers import AutoTokenizer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from urllib.parse import urlparse
-import redis
-import os
-import json
-import re
+
 
 from service_utils import init_redis, load_tokenizer_and_encoder, load_model, check_cache, retrieve_from_web, retrieve_from_db, init_mariadb, remove_www_http_https, set_cache, set_db
 
@@ -58,7 +48,6 @@ def add_to_db(data: WebsiteData):
     url_str = data.url
     category = data.category
     url_str = remove_www_http_https(url_str).lower()
-    # Assuming encoder, set_cache, and set_db are defined elsewhere and work as expected
     class_number = int(encoder.transform([category])[0])
     set_cache(redis_conn, url_str.lower(), class_number)
     set_db(mariadb_conn = mariadb_conn, cursor = cursor, url = url_str.lower(), class_number = class_number, probability = 1)
@@ -92,16 +81,14 @@ def predict(item: Item):
             pred_type = 'db'
             set_cache(redis_conn, url_str.lower(), class_number)
         else:
-            # try:
-            class_number,probability = retrieve_from_web(url_str,tokenizer,session,encoder)
-            pred_type = 'web'
-            # url_str = re.sub(r'^https?:\/\/', '', url_str)
-            print(url_str)
-            set_cache(redis_conn, url_str.lower(), class_number)
-            set_db(mariadb_conn = mariadb_conn, cursor = cursor, url = url_str.lower(), class_number = class_number, probability= probability)
-            # except:
-            #     return {"prediction": f'Error Occured, Try Again..'}
-    # return class_number
+            try:
+                class_number,probability = retrieve_from_web(url_str,tokenizer,session,encoder)
+                pred_type = 'web'
+                print(url_str)
+                set_cache(redis_conn, url_str.lower(), class_number)
+                set_db(mariadb_conn = mariadb_conn, cursor = cursor, url = url_str.lower(), class_number = class_number, probability= probability)
+            except:
+                return {"prediction": f'Error Occured, Try Again..'}
     
     category = encoder.classes_[class_number]
     return {"prediction": f'Predicted class of {url_str} from {pred_type} is: <b style="color:Tomato;">{category}</b>'}
