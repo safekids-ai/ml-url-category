@@ -55,7 +55,11 @@ def retrieve_from_web(url,tokenizer,session,encoder):
     onnx_inputs = {k: v for k, v in inputs.items() if k in [i.name for i in session.get_inputs()]}
     outputs = session.run(None, onnx_inputs)[0]
     probabilities = np.exp(outputs) / np.sum(np.exp(outputs), axis=1, keepdims=True)
-    return int(np.argmax(probabilities, axis=1)[0])
+    if max(probabilities)<0.7:
+        pred_class = None
+    else:
+        pred_class = int(np.argmax(probabilities, axis=1)[0])
+    return pred_class
 
 
 def tag_visible(element):

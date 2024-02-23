@@ -79,6 +79,8 @@ def predict(item: Item):
         else:
             try:
                 class_number = retrieve_from_web(url_str,tokenizer,session,encoder)
+                if not class_number:
+                    class_number = encoder.transform(['safe'])[0]
                 pred_type = 'web'
                 url_str = re.sub(r'^https?:\/\/', '', url_str)
                 set_cache(redis_conn, url_str, class_number)
