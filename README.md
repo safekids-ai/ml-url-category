@@ -65,7 +65,7 @@ bash setup.sh
 
 This will download 5M URLs for MariaDB and a tiny model for inferring new websites. You can use `--large-model` flag for downloading a larger and better quality model and `--parsed-data` to download raw training (136K) and 5M URLs data. These are optional and are not needed for basic usage of the service.
 
-Then, navigate to the web application directory:
+Then, make sure docker daemon is running and run following commands:
 
 ```bash
 cd web_app
