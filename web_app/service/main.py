@@ -16,7 +16,7 @@ import os
 import json
 import re
 
-from service_utils import init_redis, load_tokenizer_and_encoder, load_model, check_cache, retrieve_from_web, retrieve_from_db, init_mariadb, remove_www, set_cache, set_db
+from service_utils import init_redis, load_tokenizer_and_encoder, load_model, check_cache, retrieve_from_web, retrieve_from_db, init_mariadb, remove_www_http_https, set_cache, set_db
 
 
 
@@ -49,44 +49,58 @@ class Item(BaseModel):
 async def read_index():
     return Path("/app/assets/index.html").read_text()
 
+class WebsiteData(BaseModel):
+    url: str
+    category: str
+
+@app.post("/add_to_db/")
+def add_to_db(data: WebsiteData):
+    url_str = data.url
+    category = data.category
+    url_str = remove_www_http_https(url_str).lower()
+    # Assuming encoder, set_cache, and set_db are defined elsewhere and work as expected
+    class_number = int(encoder.transform([category])[0])
+    set_cache(redis_conn, url_str.lower(), class_number)
+    set_db(mariadb_conn = mariadb_conn, cursor = cursor, url = url_str.lower(), class_number = class_number, probability = 1)
+    return {"message": "Data added to database successfully"}
+
 
 @app.post("/predict/")
 def predict(item: Item):
     cache_res = db_res = class_number = None
-    url_str = remove_www(item.text)
+    url_str = remove_www_http_https(item.text)
     if len(url_str.split('.')) < 2:
         return {"prediction": f'Enter valid URL'}
     try:
-        cache_res = check_cache(redis_conn,url_str)
+        cache_res = check_cache(redis_conn,url_str.lower())
     except:
         redis_conn = init_redis()
-        cache_res = check_cache(redis_conn,url_str)
+        cache_res = check_cache(redis_conn,url_str.lower())
     if cache_res:
         class_number = int(cache_res)
         pred_type = 'cache'
     else:
         try:
-            db_res = retrieve_from_db(cursor, url_str)
+            db_res = retrieve_from_db(cursor, url_str.lower())
         except:
             mariadb_conn = init_mariadb()
             cursor = mariadb_conn.cursor()
-            db_res = retrieve_from_db(cursor, url_str)
-        if db_res:
+            db_res = retrieve_from_db(cursor, url_str.lower())
+        if isinstance(db_res, int):
             class_number = db_res
             class_number = int(class_number)
             pred_type = 'db'
-            set_cache(redis_conn, url_str, class_number)
+            set_cache(redis_conn, url_str.lower(), class_number)
         else:
-            try:
-                class_number = retrieve_from_web(url_str,tokenizer,session,encoder)
-                if not class_number:
-                    class_number = encoder.transform(['safe'])[0]
-                pred_type = 'web'
-                url_str = re.sub(r'^https?:\/\/', '', url_str)
-                set_cache(redis_conn, url_str, class_number)
-                set_db(mariadb_conn, cursor, url_str, class_number)
-            except:
-                return {"prediction": f'Error Occured, Try Again..'}
+            # try:
+            class_number,probability = retrieve_from_web(url_str,tokenizer,session,encoder)
+            pred_type = 'web'
+            # url_str = re.sub(r'^https?:\/\/', '', url_str)
+            print(url_str)
+            set_cache(redis_conn, url_str.lower(), class_number)
+            set_db(mariadb_conn = mariadb_conn, cursor = cursor, url = url_str.lower(), class_number = class_number, probability= probability)
+            # except:
+            #     return {"prediction": f'Error Occured, Try Again..'}
     # return class_number
     
     category = encoder.classes_[class_number]

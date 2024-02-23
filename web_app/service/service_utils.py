@@ -55,11 +55,13 @@ def retrieve_from_web(url,tokenizer,session,encoder):
     onnx_inputs = {k: v for k, v in inputs.items() if k in [i.name for i in session.get_inputs()]}
     outputs = session.run(None, onnx_inputs)[0]
     probabilities = np.exp(outputs) / np.sum(np.exp(outputs), axis=1, keepdims=True)
-    if max(probabilities)<0.7:
-        pred_class = None
+    probability = np.max(probabilities)
+    if probability < 0.7:
+        pred_class = encoder.transform(['safe'])[0]
+        probability = 0.7
     else:
-        pred_class = int(np.argmax(probabilities, axis=1)[0])
-    return pred_class
+        pred_class = np.argmax(probabilities, axis=1)[0]
+    return int(pred_class), float(probability)
 
 
 def tag_visible(element):
@@ -69,8 +71,8 @@ def tag_visible(element):
         return False
     return True
 
-def remove_www(url):
-    return re.sub(r'^(https?://)?www\.', r'\1', url, 1, re.IGNORECASE)
+def remove_www_http_https(url):
+    return re.sub(r'^(https?://)?(www\.)?', '', url, flags=re.IGNORECASE)
 
 def filter_meta(meta):
     filtered=[]
@@ -120,15 +122,19 @@ def retrieve_from_db(cursor,url):
     return rows
 
 def set_cache(redis_conn, url, class_number):
-    try:
-        redis_conn.set(url, class_number, ex=3600)
-    except:
-        pass
+    # try:
+    redis_conn.set(url, class_number, ex=3600)
+    print('aaaa')
+    # except:
+    #     print('aaaa1')
+    #     pass
 
-def set_db(mariadb_conn, cursor, url, class_number):
-    try:
-        query = "INSERT INTO predictions (url, label, probability) VALUES (%s, %s ) ON DUPLICATE KEY UPDATE class_number = %s"
-        cursor.execute(query, (url, class_number, class_number))
-        mariadb_conn.commit()
-    except:
-        pass
+def set_db(mariadb_conn, cursor, url, class_number, probability):
+    # try:
+    query = f"INSERT INTO {TABLE_NAME} (url, label, probability) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE label = VALUES(label), probability = VALUES(probability)"
+    cursor.execute(query, (url, class_number, probability))
+    mariadb_conn.commit()
+    print('bbbbbbbb')
+    # except:
+    #     print('bbbbbbbb1')
+    #     pass

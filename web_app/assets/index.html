@@ -62,12 +62,23 @@
       <div id="result">
         <!-- The result will be displayed here -->
       </div>
+      <div class="form-group">
+        <label for="categorySelect">Select Category:</label>
+        <select class="form-control" id="categorySelect">
+          <!-- Options will be added here dynamically -->
+        </select>
+      </div>
+      <div class="text-center" style="margin-top: 20px">
+        <button type="button" class="btn btn-success" id="addToDbButton">
+          ADD TO DB
+        </button>
+      </div>
     </div>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("websiteClassifierForm");
         form.onsubmit = function (event) {
-          event.preventDefault(); // Prevent the default form submission
+          event.preventDefault();
           const websiteUrl = document.getElementById("websiteInput").value;
 
           fetch("http://localhost:8000/predict/", {
@@ -76,11 +87,11 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ text: websiteUrl }), // Update to match the FastAPI expected format
+            body: JSON.stringify({ text: websiteUrl }),
           })
             .then((response) => response.json())
             .then((data) => {
-              document.getElementById("result").innerHTML = data.prediction; // Adjust according to your server's response
+              document.getElementById("result").innerHTML = data.prediction;
             })
             .catch((error) => {
               console.error("Error:", error);
@@ -89,6 +100,69 @@
             });
         };
       });
+
+      const categoriesList = [
+        "adult_sexual_content",
+        "body_image/related_to_disordered_eating",
+        "clothing_fashion_and_jewelry",
+        "criminal/malicious",
+        "drugs_alcohol_or_tobacco_related",
+        "entertainment_news_and_streaming",
+        "fake_news",
+        "gambling",
+        "hate_speech",
+        "online_gaming",
+        "safe",
+        "self_harm/suicidal_content",
+        "sex_education",
+        "shopping_and_product_reviews",
+        "social_media_and_chat",
+        "violence",
+        "weapons",
+      ];
+      const categorySelect = document.getElementById("categorySelect");
+
+      // Adding placeholder as the first option
+      const placeholderOption = document.createElement("option");
+      placeholderOption.text = "Choose correct class";
+      placeholderOption.disabled = true;
+      placeholderOption.selected = true;
+      categorySelect.appendChild(placeholderOption);
+
+      // Populating the dropdown with categories
+      categoriesList.forEach((category) => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.text = category;
+        categorySelect.appendChild(option);
+      });
+
+      document
+        .getElementById("addToDbButton")
+        .addEventListener("click", function () {
+          const selectedCategory = categorySelect.value;
+          const websiteUrl = document.getElementById("websiteInput").value; // Gets the URL from the input field
+
+          fetch("http://localhost:8000/add_to_db/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: websiteUrl,
+              category: selectedCategory,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Handle success response
+              alert("Added to DB successfully"); // Or update your UI accordingly
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error adding to DB");
+            });
+        });
     </script>
   </body>
 </html>
