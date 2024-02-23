@@ -1,12 +1,10 @@
 import pandas as pd
 import requests
-import re
 from bs4.element import Comment
 from bs4 import BeautifulSoup
 import os
 import json
-import pyarrow as pa
-import pyarrow.parquet as pq
+
 from io import BytesIO
 from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_TXT_PATH, headers
 

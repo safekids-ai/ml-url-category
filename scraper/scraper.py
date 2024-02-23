@@ -1,4 +1,3 @@
-import pandas as pd
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 import os
