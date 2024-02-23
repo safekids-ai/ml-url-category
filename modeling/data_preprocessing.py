@@ -8,10 +8,10 @@ import nltk
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import pickle
-
+from helpers.config import ENCODER_PATH,TRAIN_DATASET_PATH,TEST_DATASET_PATH,MODEL_NAME,TRAIN_DATA_PATH
 
 nltk.download('stopwords')
-tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 
 def tokenize_batch(batch):
@@ -23,7 +23,7 @@ def tokenize_batch(batch):
 
 
 
-df = pd.read_parquet('/kaggle/input/website-classifier-dataset')
+df = pd.read_parquet(TRAIN_DATA_PATH)
 
 encoder = LabelEncoder()
 
@@ -31,7 +31,7 @@ df['encoded_labels'] = encoder.fit_transform(df['category'])
 
 df['encoded_labels']=df['encoded_labels'].astype(int)
 
-with open('encoder.pkl','wb') as f:
+with open(ENCODER_PATH,'wb') as f:
     pickle.dump(encoder,f)
 
 
@@ -48,5 +48,5 @@ train_dataset = train_dataset.map(tokenize_batch, batched=True,batch_size=32)
 test_dataset = test_dataset.map(tokenize_batch, batched=True,batch_size=32)
 
 
-train_dataset.save_to_disk("train_dataset")
-test_dataset.save_to_disk("test_dataset")
+train_dataset.save_to_disk(TRAIN_DATASET_PATH)
+test_dataset.save_to_disk(TEST_DATASET_PATH)
