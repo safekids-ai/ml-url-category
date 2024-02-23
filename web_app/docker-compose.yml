@@ -50,7 +50,7 @@ services:
     volumes:
       - ./service:/app/service
       - ./assets:/app/assets
-      - ./tiny_model:/app/tiny_model
+      - ./model_binary:/app/model_binary
     depends_on:
       - mariadb
       - redis

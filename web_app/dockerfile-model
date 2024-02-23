@@ -19,9 +19,9 @@ COPY ./service/main.py /app/service/main.py
 COPY ./service/service_config.py /app/service/service_config.py
 COPY ./service/service_utils.py /app/service/service_utils.py
 
-COPY ./tiny_model/encoder.pkl /app/tiny_model/encoder.pkl
-COPY ./tiny_model/model.onnx /app/tiny_model/model.onnx
-COPY ./tiny_model/tokenizer /app/tiny_model/tokenizer
+COPY ./model_binary/encoder.pkl /app/model_binary/encoder.pkl
+COPY ./model_binary/model.onnx /app/model_binary/model.onnx
+COPY ./model_binary/tokenizer /app/model_binary/tokenizer
 
 ENV PYTHONPATH="${PYTHONPATH}:/app/service"
 
