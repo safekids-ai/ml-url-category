@@ -2,15 +2,15 @@ MAX_WORKERS = 30
 
 PROTOCOLS = ["https://","http://"]
 
-FILE_KEY = 'URLS_TO_PARSE.txt'
+FILE_KEY = 'URLS_TO_PARSE.txt' #write urls to parse on newlines
 
-LOCAL_TMP_DIR = "txt_output"
+LOCAL_TMP_DIR = "txt_output" #htmls will be downloaded here temporarily
 
 LOCAL_TMP_TXT_PATH = LOCAL_TMP_DIR + '/tmp_data.txt'
 
-BULK_DATA_BUCKET_OR_PATH = ''
+BULK_DATA_BUCKET_OR_PATH = '' #if you are using s3 mode, place your txt file here
 
-BUCKET_OR_PATH_TO_SAVE = ''
+BUCKET_OR_PATH_TO_SAVE = '' #ourput destination of parquets
 
 headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',

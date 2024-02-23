@@ -9,8 +9,6 @@ from io import BytesIO
 from helpers.config import PROTOCOLS, LOCAL_TMP_DIR, LOCAL_TMP_TXT_PATH, headers
 
 def write_parquet(uuid, client_or_none, bucket_or_directory,mode):
-    # with open(LOCAL_TMP_TXT_PATH, encoding="utf-8") as f:
-    #     dict_list = [json.loads(line.strip()) for line in f.readlines()]
     dict_list = []
     with open(LOCAL_TMP_TXT_PATH, encoding="utf-8") as f:
         for line in f.readlines():
