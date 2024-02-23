@@ -19,10 +19,9 @@ BUCKET="ml-url-category-safekids-ai-large-files"
 
 # Define key-folder pairs for directories and individual files to download
 declare -A KEY_FOLDER_MAP=(
-  ["tiny_model/"]="web_app/tiny_model/"
+  ["model_binary/"]="web_app/model_binary/"
   ["mariadb_data.csv"]="web_app/database/data/mariadb_data.csv"
   ["parsed_data/"]="parsed_data/"
-  ["large_model/"]="modeling/large_model/"
 )
 
 # Optionally, define keys to skip when not downloading everything

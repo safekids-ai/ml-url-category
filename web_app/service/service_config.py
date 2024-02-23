@@ -30,6 +30,6 @@ HEADERS = {
 
 TABLE_NAME = 'urls_table'
 # Model and Tokenizer Configuration
-TOKENIZER_CHECKPOINT = "/app/tiny_model/tokenizer/"
-ONNX_MODEL_PATH = '/app/tiny_model/model.onnx'
-ENCODER_PATH = '/app/tiny_model/encoder.pkl'
+TOKENIZER_CHECKPOINT = "/app/model_binary/tokenizer/"
+ONNX_MODEL_PATH = '/app/model_binary/model.onnx'
+ENCODER_PATH = '/app/model_binary/encoder.pkl'

@@ -68,6 +68,24 @@ def tag_visible(element):
 def remove_www(url):
     return re.sub(r'^(https?://)?www\.', r'\1', url, 1, re.IGNORECASE)
 
+def filter_meta(meta):
+    filtered=[]
+    for m in meta:
+        cond1 = any(type(v)==str for v in m.values())
+        if m['name']==None:
+            m['name']=''
+        if m['content']==None:
+            m['content']=''
+        if cond1:
+            conds=[]
+            conds.append(not m['content'].isnumeric())
+            conds.append(' ' in m['content'])
+            conds.append(not any([k in m['name'] for k in ['viewport','twitter','robots','generator']]))
+            conds.append(not any([k in m['content'] for k in ['text/html','charset','UTF-8']]))
+            if all(conds):
+                filtered.append(m)
+    return list({i['content']:i for i in reversed(filtered)}.values())
+
 # Retrieve text from URL
 def retrieve_text(url):
     if not urlparse(url).scheme:
@@ -76,13 +94,15 @@ def retrieve_text(url):
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         title = soup.title.string if soup.title else ''
-        meta_tags = [{'name': tag.get('name'), 'content': tag.get('content')} for tag in soup.find_all('meta')][:100]
+        meta_tags = [{'name': tag.get('name'), 'content': tag.get('content')} for tag in soup.find_all('meta')]
+        meta_tags = filter_meta(meta_tags)[:100]
         meta_tags = [m['content'] for m in meta_tags if m['content']!=None]
         meta_descr = ' '.join(meta_tags)
         texts = soup.findAll(text=True)
         visible_texts = filter(tag_visible, texts)
         visible_text = u" ".join(t.strip() for t in visible_texts)
-        text = title + meta_descr + visible_text
+        domain_name = re.sub(r'^(http:\/\/|https:\/\/)?(www\.)?', '', url).split('/')[0]
+        text = title + domain_name + meta_descr + visible_text
         url = re.sub(r'^https?:\/\/', '', url)
         return text
     else:
