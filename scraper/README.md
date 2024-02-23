@@ -1,8 +1,23 @@
-# Data Collection Overview
+## Scraper
 
-This document details the datasets leveraged in this project, focusing on Tranco and DomCorp datasets for our current use case.
+To run scraper you just do these steps:
 
-## Overview of Datasets
+```
+conda create -n YOUR_ENV_NAME python==3.10
+
+conda activate YOUR_ENV_NAME
+
+pip install -r requirements.txt
+
+python scrape.py --mode local
+```
+
+Check out config.py and set all your path/bucket variables there.
+it supports 2 modes: local and s3.
+
+I only used s3 mode, because I parsed more than 10m websites and they took terabytes.
+
+## Overview of Parsed Datasets
 
 ### Alexa Top 1 Million Websites
 
@@ -12,7 +27,7 @@ This document details the datasets leveraged in this project, focusing on Tranco
 ### Cisco Umbrella
 
 - **Description**: This dataset encompasses DNS activity and network traffic, collected for cybersecurity analysis by Cisco's Umbrella service. It's instrumental in identifying threats, blocking malicious sites, and enhancing network security through traffic categorization.
-  
+
 ### Tranco
 
 - **Description**: Tranco combines multiple data sources to rank websites by popularity and traffic, updated daily. It encourages community contribution and is a free resource for tracking internet trends.
