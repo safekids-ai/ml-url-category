@@ -114,39 +114,3 @@ def write_df(df, bucket_or_directory, object_key_or_path, client_or_none, mode='
             pass
     else:
         raise ValueError("Invalid mode specified. Use 's3' or 'local'.")
-
-
-#This is needed if parsing was interrupted and you are continueing download from the previous batch. 
-def get_max_batch_N(s3, bucket_or_directory, mode, instance_id):
-    files = []
-    # Create a paginator for listing objects in the S3 bucket
-    if mode=='s3':
-        paginator = s3.get_paginator('list_objects_v2')
-        pages = paginator.paginate(Bucket=bucket_or_directory)
-
-        # Iterate over each page of results
-        for page in pages:
-            # Check if there are any contents in the page
-            if "Contents" in page:
-                for obj in page["Contents"]:
-                    filename = obj["Key"]
-                    if filename.endswith('.parquet') & filename.startswith(str(instance_id)):
-                        files.append(filename.split('n')[0].split('_')[1])
-        files=[file for file in files if file!='']
-        files=[int(file) for file in files]
-        if files == []:
-            return 0
-    elif mode=='local':
-        # List files in the local directory
-        for filename in os.listdir(bucket_or_directory):
-            if filename.endswith('.parquet'):
-                try:
-                    batch_number = int(filename.split('n')[0].split('_')[1])
-                    files.append(batch_number)
-                except ValueError:
-                    # If conversion to int fails, skip this file
-                    continue
-
-        if not files:
-            return 0
-    return max(files)+1

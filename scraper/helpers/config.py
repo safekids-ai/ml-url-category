@@ -8,9 +8,9 @@ LOCAL_TMP_DIR = "txt_output"
 
 LOCAL_TMP_TXT_PATH = LOCAL_TMP_DIR + '/tmp_data.txt'
 
-BULK_DATA_BUCKET_OR_PATH = 'batch-urls'
+BULK_DATA_BUCKET_OR_PATH = ''
 
-BUCKET_OR_PATH_TO_SAVE = 'batch-htmls'
+BUCKET_OR_PATH_TO_SAVE = ''
 
 headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
