@@ -2,12 +2,12 @@
 
 DOWNLOAD_RAW_DATA=$([[ "$1" == "--parsed-data" ]] && echo true || echo false)
 
-BUCKET="safekids-ml"
+BUCKET="safekids-ml/Url-Categorizer"
 
 declare -A KEY_FOLDER_MAP=(
-  ["Url-Categorizer/model"]="web_app/model_binary/"
-  ["Url-Categorizer/url-database/mariadb_data.csv"]="web_app/database/data/mariadb_data.csv"
-  ["Url-Categorizer/training_data/"]="parsed_data/"
+  ["model/"]="web_app/model_binary/"
+  ["url-database/"]="web_app/database/data/"
+#  ["training-data/"]="parsed_data/"
 )
 
 SKIP_KEYS=("parsed_data/")
@@ -26,12 +26,12 @@ for KEY in "${!KEY_FOLDER_MAP[@]}"; do
     # Ensure the local directory exists and download the directory
     mkdir -p "$LOCAL_PATH"
     echo "Syncing directory ${KEY%/} to $LOCAL_PATH"
-    aws s3 sync "s3://$BUCKET/${KEY%/}" "$LOCAL_PATH" --no-sign-request
+    aws s3 sync "s3://$BUCKET/${KEY%/}" "$LOCAL_PATH" --no-sign-request --endpoint=https://nyc3.digitaloceanspaces.com
   else
     # Ensure the local directory for the file exists and download the file
     mkdir -p "$(dirname "$LOCAL_PATH")"
     echo "Copying file $KEY to $LOCAL_PATH"
-    aws s3 cp "s3://$BUCKET/$KEY" "$LOCAL_PATH" --no-sign-request
+    aws s3 cp "s3://$BUCKET/$KEY" "$LOCAL_PATH" --no-sign-request --endpoint=https://nyc3.digitaloceanspaces.com
   fi
 done
 
