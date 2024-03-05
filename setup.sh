@@ -2,12 +2,12 @@
 
 DOWNLOAD_RAW_DATA=$([[ "$1" == "--parsed-data" ]] && echo true || echo false)
 
-BUCKET="ml-url-category-safekids-ai-large-files"
+BUCKET="safekids-ml"
 
 declare -A KEY_FOLDER_MAP=(
-  ["model_binary/"]="web_app/model_binary/"
-  ["mariadb_data.csv"]="web_app/database/data/mariadb_data.csv"
-  ["parsed_data/"]="parsed_data/"
+  ["Url-Categorizer/model"]="web_app/model_binary/"
+  ["Url-Categorizer/url-database/mariadb_data.csv"]="web_app/database/data/mariadb_data.csv"
+  ["Url-Categorizer/training_data/"]="parsed_data/"
 )
 
 SKIP_KEYS=("parsed_data/")
