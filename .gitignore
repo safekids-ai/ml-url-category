@@ -3,7 +3,9 @@
 *.parquet
 *.ipynb
 *.csv
-
+*.DS_Store
+.idea
+web_app/model_binary
 web_app/tiny_model/tokenizer/config.json
 web_app/tiny_model/tokenizer/vocab.txt
 
